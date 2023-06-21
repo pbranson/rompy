@@ -1,0 +1,4 @@
+GEN3 WESTH 0.000075 0.00175
+BREAKING
+FRICTION {{config.physics.friction}} {{config.physics.friction_coeff}}
+BOBSY
