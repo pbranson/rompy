@@ -257,7 +257,7 @@ class SwanConfig(BaseConfig):
         ret["forcing"] = self.forcing.get(
             self.grid, runtime.period, runtime.staging_dir
         )
-        ret["physics"] = f"{self.physics.cmd}"
+        ret["physics"] = self.physics
         ret["outputs"] = self.outputs.cmd
         ret["output_locs"] = self.outputs.spec.locations
         return ret

@@ -1,0 +1,1 @@
+MODE {{config.mode.kind}} {{config.mode.dim}}

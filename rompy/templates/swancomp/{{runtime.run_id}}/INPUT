@@ -2,7 +2,7 @@
 
 {% if config.project %}{{config.project.render()}}{% endif %}
 {% if config.set != None %}{{config.set.render()}}{% endif %}
-{% if config.mode != None %}{{config.mode.render()}}{% endif %}
+{% if config.mode != None %}{% include "mode.txt" %}{% endif %}
 {% if config.coordinates != None %}{{config.coordinates.render()}}{% endif %}
 
 

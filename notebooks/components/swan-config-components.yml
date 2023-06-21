@@ -15,8 +15,8 @@ set:
 
 mode:
   model_type: mode
-  kind: nonstationary
-  dim: twodimensional
+  # kind: nonstationary
+  # dim: twodimensional
 
 coordinates:
   model_type: coordinates

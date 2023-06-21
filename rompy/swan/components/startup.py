@@ -254,14 +254,14 @@ class MODE(BaseComponent):
     model_type: Literal["mode"] = Field(
         default="mode", description="Model type discriminator."
     )
-    kind: Literal["stationary", "nonstationary"] = Field(
-        default="stationary",
+    kind: Literal["STATIONARY", "NONSTATIONARY"] = Field(
+        default="STATIONARY",
         description=(
             "Indicates that the run will be either stationary or nonstationary."
         ),
     )
-    dim: Literal["onedimensional", "twodimensional"] = Field(
-        default="twodimensional",
+    dim: Literal["ONEDIMENSIONAL", "TWODIMENSIONAL"] = Field(
+        default="TWODIMENSIONAL",
         description=(
             "Indicates that the run will be either one-dimensional (1D-mode) or "
             "two-dimensional (2D-mode)."
@@ -269,7 +269,8 @@ class MODE(BaseComponent):
     )
 
     def cmd(self) -> str:
-        return f"MODE {self.kind.upper()} {self.dim.upper()}"
+        return ''
+        # return f"MODE {self.kind.upper()} {self.dim.upper()}"
 
 
 class COORDINATES(BaseComponent):
