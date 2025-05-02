@@ -428,6 +428,10 @@ class GridLinker(GeneratorBase):
         elif self.gridtype == "hgrid_WWM":
             filename = "hgrid_WWM.gr3"
         dest = Path(destdir) / f"{filename}"
+        # Check if already linked and remove if so
+        if dest.is_symlink():
+            logger.info(f"Removing existing link {dest}")
+            dest.unlink()
         logger.info(f"Linking {ref} to {dest}")
         dest.symlink_to(ref)
         return dest
@@ -637,7 +641,11 @@ class SCHISMGrid(BaseGrid):
             self.pyschism_hgrid, np.array([1] * len(self.pyschism_hgrid.elements))
         )
         dest = destdir / "tvd.prop"
-        tvdflag.write(dest)
+        if os.path.exists(dest):
+            logger.info(f"Removing existing tvd.prop file {dest}")
+            os.remove(dest)
+        logger.info(f"Generating tvd.prop file {dest}")
+        tvdflag.write(dest, overwrite=True)
         return dest
 
     def boundary(self, tolerance=None) -> Polygon:
