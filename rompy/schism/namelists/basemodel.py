@@ -52,14 +52,14 @@ def recursive_update(model: BaseModel, updates: Dict[str, Any]) -> BaseModel:
 class NamelistBaseModel(RompyBaseModel):
     """Base model for namelist variables"""
 
-    @model_validator(mode="before")
-    def __lowercase_property_keys__(cls, values: Any) -> Any:
-        def __lower__(value: Any) -> Any:
-            if isinstance(value, dict):
-                return {k.lower(): __lower__(v) for k, v in value.items()}
-            return value
+    # @model_validator(mode="before")
+    # def __lowercase_property_keys__(cls, values: Any) -> Any:
+    #     def __lower__(value: Any) -> Any:
+    #         if isinstance(value, dict):
+    #             return {k.lower(): __lower__(v) for k, v in value.items()}
+    #         return value
 
-        return __lower__(values)
+    #     return __lower__(values)
 
     def update(self, update: Dict[str, Any]):
         """Update the namelist variable with new values. Reninitializes the instance, ensuring all validations are run"""
