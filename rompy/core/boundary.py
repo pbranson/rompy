@@ -144,7 +144,11 @@ class DataBoundary(DataGrid):
             self.coords.x: xr.DataArray(xbnd, dims=("site",)),
             self.coords.y: xr.DataArray(ybnd, dims=("site",)),
         }
-        return getattr(self.ds, self.sel_method)(coords, **self.sel_method_kwargs)
+        if self.sel_method == "sel":
+            coords.update(self.sel_method_kwargs)
+            return getattr(self.ds, self.sel_method)(**coords)
+        else:
+            return getattr(self.ds, self.sel_method)(coords, **self.sel_method_kwargs)
 
     def get(
         self, destdir: str | Path, grid: RegularGrid, time: Optional[TimeRange] = None
