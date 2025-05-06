@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from pydantic import Field, model_serializer
+from pydantic import Field, model_serializer, model_validator
 
 from rompy.core import TimeRange
 from rompy.schism.namelists.basemodel import NamelistBaseModel
@@ -32,6 +32,40 @@ class NML(NamelistBaseModel):
     wwminput: Optional[Wwminput] = Field(
         description="Wave model input parameters", default=None
     )
+
+    @model_validator(mode="after")
+    def validate_atmospheric_settings(self):
+        """Validate atmospheric settings including wtiminc relationship with dt."""
+        # Skip if essential components aren't available
+        if not hasattr(self, 'param') or self.param is None:
+            return self
+        if not hasattr(self.param, 'opt') or self.param.opt is None:
+            return self
+        if not hasattr(self.param, 'core') or self.param.core is None:
+            return self
+        
+        opt = self.param.opt
+        core = self.param.core
+        
+        # Check wtiminc based on nws settings
+        if opt.nws != 0 and opt.nws != -1:  # Atmospheric forcing is active
+            # When nws=-1, wtiminc is not used (Holland model called every step)
+            
+            # Check that wtiminc is greater than dt
+            if opt.wtiminc <= core.dt:
+                raise ValueError(f"wtiminc ({opt.wtiminc}) must be greater than dt ({core.dt})")
+            
+            # Check that wtiminc is a multiple of dt (with float tolerance)
+            remainder = opt.wtiminc % core.dt
+            if remainder > 1e-10 and abs(remainder - core.dt) > 1e-10:
+                raise ValueError(f"wtiminc ({opt.wtiminc}) must be a multiple of dt ({core.dt})")
+        
+        # Additional validation for stress calculation options
+        if opt.nws == 2 and opt.ihconsv == 1 and opt.iwind_form == 0:
+            # Add a warning about USE_ATMOS compatibility
+            logger.warning("With nws=2, ihconsv=1, and iwind_form=0, USE_ATMOS should be off")
+        
+        return self
     
     @model_serializer
     def serialize_model(self, **kwargs):
