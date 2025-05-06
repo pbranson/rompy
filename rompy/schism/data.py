@@ -490,12 +490,17 @@ class SCHISMDataBoundary(DataBoundary):
         if self.interpolate_missing_coastal:
             for i in range(data.shape[0]):
                 data[i, :] = fill_tails(data[i, :])
-        time_series = np.expand_dims(data, axis=(2, 3))
+        ds[self.variable].values = data
+        
+        # Expand the dimensions using xarray to ensure the correct shape and order
+        time_series = ds[self.variable].expand_dims({"nLevels": 1, "nComponents": 1})
+        time_series = time_series.transpose("time", "site", "nLevels", "nComponents")
+        # time_series = np.expand_dims(data, axis=(2, 3))
 
         schism_ds = xr.Dataset(
             coords={
                 "time": ds.time,
-                "nOpenBndNodes": np.arange(0, ds.xlon.size),
+                "nOpenBndNodes": np.arange(0, ds.site.size),
                 "nComponents": np.array([1]),
                 "one": np.array([1]),
             },
@@ -503,7 +508,7 @@ class SCHISMDataBoundary(DataBoundary):
                 "time_step": (("one"), np.array([dt])),
                 "time_series": (
                     ("time", "nOpenBndNodes", "nLevels", "nComponents"),
-                    time_series,
+                    time_series.values,
                 ),
             },
         )
