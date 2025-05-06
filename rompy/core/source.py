@@ -169,7 +169,7 @@ class SourceIntake(SourceBase):
             return YAMLFileCatalog("temp.yaml", fs=fs)
 
     def _open(self) -> xr.Dataset:
-        return self.catalog[self.dataset_id](**self.kwargs).to_dask()
+        return self.catalog[self.dataset_id](**self.kwargs).read()
 
 
 class SourceDatamesh(SourceBase):
