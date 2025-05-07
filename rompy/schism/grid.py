@@ -748,8 +748,15 @@ class SCHISMGrid(BaseGrid):
         ax.set_title("Mesh")
 
     def ocean_boundary(self):
-        bnd = self.pyschism_hgrid.boundaries.open.get_coordinates()
-        return bnd.x.values, bnd.y.values
+        # bnd = self.pyschism_hgrid.boundaries.open.get_coordinates()
+
+        # Assume that the longest boundary is the ocean boundary
+        # TODO - this is a bit of a hack, need to find a better way to do this
+        gdf_bo = self.pyschism_hgrid.boundaries.open #gdf
+        blength = gdf_bo.length
+        bnd = gdf_bo.geometry[blength.idxmax()]
+        x, y = bnd.xy
+        return x, y
 
     def land_boundary(self):
         bnd = self.pyschism_hgrid.boundaries.land.get_coordinates()
