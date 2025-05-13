@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import Field, model_serializer, model_validator
 
-from rompy.core import TimeRange
+from rompy.core.time import TimeRange
 from rompy.schism.namelists.basemodel import NamelistBaseModel
 
 from .cosine import Cosine
@@ -66,18 +66,18 @@ class NML(NamelistBaseModel):
             logger.warning("With nws=2, ihconsv=1, and iwind_form=0, USE_ATMOS should be off")
         
         return self
-    
+
     @model_serializer
     def serialize_model(self, **kwargs):
         """Custom serializer to handle proper serialization of namelist components."""
         result = {}
-        
+
         # Include only non-None fields in the serialized output
         for field_name in self.model_fields:
             value = getattr(self, field_name, None)
             if value is not None:
                 result[field_name] = value
-                
+
         return result
 
     def update_times(self, period=TimeRange):
