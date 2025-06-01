@@ -742,6 +742,16 @@ class Bctides:
         amp_flat = amp.flatten()
         pha_flat = pha.flatten()
 
+        # Speed up interpolation by subset the data to the proximity of xi, yi
+        inds = lon_flat >= np.min(xi) - 1.0
+        inds &= lon_flat <= np.max(xi) + 1.0
+        inds &= lat_flat >= np.min(yi) - 1.0
+        inds &= lat_flat <= np.max(yi) + 1.0
+        lon_flat = lon_flat[inds]
+        lat_flat = lat_flat[inds]
+        amp_flat = amp_flat[inds]
+        pha_flat = pha_flat[inds]
+
         # Filter out NaN values
         valid_indices = (
             ~np.isnan(lon_flat)
