@@ -3,7 +3,7 @@ period:
   start: 20230101T00
   end: 20230101T12
   interval: 3600
-run_id: test_schism_nml_3d_tidal_velocities
+run_id: test_schism_nml_3d_nontidal_velocities_enhanced
 delete_existing: True
 config:
   model_type: schism
@@ -54,31 +54,31 @@ config:
           uri: "../../tests/schism/test_data/hycom.nc"
         variables: 
          - salinity
-      # uv3d:
-      #   buffer: 0.0
-      #   coords:
-      #     t: time
-      #     x: xlon
-      #     y: ylat
-      #     z: depth
-      #   source: 
-      #     model_type: file
-      #     uri:  ../../tests/schism/test_data/hycom.nc
-      #   variables: 
-      #     - water_u
-      #     - water_v
-      # TEM_3D:
-      #   buffer: 0.0
-      #   coords:
-      #     t: time
-      #     x: xlon
-      #     y: ylat
-      #     z: depth
-      #   source: 
-      #     model_type: file
-      #     uri: "../../tests/schism/test_data/hycom.nc"
-      #   variables: 
-      #     - temperature
+      uv3D:
+        buffer: 0.0
+        coords:
+          t: time
+          x: xlon
+          y: ylat
+          z: depth
+        source: 
+          model_type: file
+          uri:  ../../tests/schism/test_data/hycom.nc
+        variables: 
+          - water_u
+          - water_v
+      TEM_3D:
+        buffer: 0.0
+        coords:
+          t: time
+          x: xlon
+          y: ylat
+          z: depth
+        source: 
+          model_type: file
+          uri: "../../tests/schism/test_data/hycom.nc"
+        variables: 
+          - temperature
     hotstart:
       source: 
         model_type: file
@@ -91,17 +91,22 @@ config:
         y: ylat
         z: depth
     tides:
-      constituents:
-      - M2
-      - S2
-      - N2
+      data_type: tides_enhanced
+      constituents: [M2, S2, N2]
+      tidal_database: "tpxo"
+      ntip: 0
       cutoff_depth: 50.0
-      flags: 
-        - [5, 3, 4, 4]
       tidal_data:
         data_type: tidal_dataset
         elevations: ../../tests/schism/test_data/tpxo9-neaus/h_m2s2n2.nc
         velocities: ../../tests/schism/test_data/tpxo9-neaus/u_m2s2n2.nc
+      # Enhanced boundary configuration
+      boundaries:
+        0:  # Applied to all open boundaries
+          elev_type: 5  # TIDALSPACETIME: Combined tidal + external data
+          vel_type: 3   # SPACETIME: External velocity data
+          temp_type: 4  # SPACETIME: External temperature data
+          salt_type: 4  # SPACETIME: External salinity data
     wave:
       buffer: 0.0
       coords:

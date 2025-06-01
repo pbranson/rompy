@@ -29,13 +29,6 @@ from rompy.schism.data import (
 from rompy.schism.grid import SCHISMGrid
 from rompy.schism.vgrid import VGrid as SchismVGrid
 
-# Helper functions imported from test_adapter
-from tests.schism.test_adapter import (
-    ensure_boundary_data_format,
-    patch_output_file,
-    prepare_test_grid,
-)
-
 
 @pytest.fixture
 def test_data_dir():
@@ -74,16 +67,12 @@ def grid2d(test_files_dir):
         hgrid=DataBlob(source=test_files_dir / "hgrid.gr3"),
         drag=1.0,
     )
-
-    # Prepare the grid using helpers from test_adapter
-    grid = prepare_test_grid(grid)
     return grid
 
 
 @pytest.fixture
 def grid3d(test_files_dir):
     """Return a 3D SCHISM grid with vgrid for testing."""
-    # Prepare vgrid based on existence
     vgrid_path = test_files_dir / "vgrid.in"
     if vgrid_path.exists():
         vgrid = DataBlob(source=vgrid_path)
@@ -100,8 +89,6 @@ def grid3d(test_files_dir):
         drag=1.0,
     )
 
-    # Prepare the grid using helpers from test_adapter
-    grid = prepare_test_grid(grid)
     return grid
 
 
@@ -148,3 +135,43 @@ def hycom_bnd_temp_3d(test_files_dir):
         filter=Filter(),
         crop_data=True,
     )
+
+
+@pytest.fixture
+def tidal_data_files(test_files_dir):
+    """Return paths to tidal elevation and velocity files for testing."""
+    tpxo_dir = test_files_dir / "tpxo9-neaus"
+    return {
+        "elevation": str(tpxo_dir / "h_m2s2n2.nc"),
+        "velocity": str(tpxo_dir / "u_m2s2n2.nc"),
+    }
+
+
+@pytest.fixture
+def tidal_dataset(tidal_data_files):
+    """Return a tidal dataset instance for testing."""
+    from rompy.schism.tides_enhanced import TidalDataset
+
+    return TidalDataset(
+        elevations=tidal_data_files["elevation"],
+        velocities=tidal_data_files["velocity"],
+    )
+
+
+@pytest.fixture
+def mock_tidal_data():
+    """Create mock tidal data for testing."""
+    import numpy as np
+
+    # Mock data for testing - enough for any boundary size
+    # For elevation: [amplitude, phase]
+    # For velocity: [u_amplitude, u_phase, v_amplitude, v_phase]
+    def mock_data(self, lons, lats, constituent, data_type="h"):
+        if data_type == "h":  # Elevation
+            return np.array([[0.5, 45.0] for _ in range(len(lons))])
+        elif data_type == "uv":  # Velocity
+            return np.array([[0.1, 30.0, 0.2, 60.0] for _ in range(len(lons))])
+        else:
+            raise ValueError(f"Unknown data type: {data_type}")
+
+    return mock_data

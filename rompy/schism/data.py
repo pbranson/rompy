@@ -10,24 +10,23 @@ import scipy as sp
 import xarray as xr
 from cloudpathlib import AnyPath
 from pydantic import ConfigDict, Field, field_validator, model_validator
-from pylib import (compute_zcor, read_schism_bpfile, read_schism_hgrid,
-                   read_schism_vgrid)
+from pylib import compute_zcor, read_schism_bpfile, read_schism_hgrid, read_schism_vgrid
 
 from rompy.core.data import DataGrid
 from rompy.core.types import RompyBaseModel
 from rompy.core.boundary import BoundaryWaveStation, DataBoundary
 from rompy.core.data import DataBlob
 from rompy.core.time import TimeRange
-from rompy.schism.bctides import Bctides  # Using direct implementation
-from rompy.schism.boundary import Boundary3D  # Using direct implementation
+from rompy.schism.bctides import Bctides
+from rompy.schism.tides_enhanced import SCHISMDataTidesEnhanced
+from rompy.schism.boundary import Boundary3D
 from rompy.schism.boundary import BoundaryData
-from rompy.schism.grid import \
-    SCHISMGrid  # Now imported directly from grid module
-from rompy.schism.hotstart import \
-    SCHISMDataHotstart  # Import from dedicated module
+from rompy.schism.grid import SCHISMGrid
+from rompy.schism.hotstart import SCHISMDataHotstart
 from rompy.utils import total_seconds
 
 from .namelists import Sflux_Inputs
+
 # Import numpy type handlers to enable proper Pydantic validation with numpy types
 from .numpy_types import to_python_type
 
@@ -1253,8 +1252,8 @@ class SCHISMData(RompyBaseModel):
     wave: Optional[Union[DataBlob, SCHISMDataWave]] = Field(
         None, description="wave data"
     )
-    tides: Optional[Union[DataBlob, SCHISMDataTides]] = Field(
-        None, description="tidal data"
+    tides: Optional[Union[DataBlob, SCHISMDataTides, "SCHISMDataTidesEnhanced"]] = (
+        Field(None, description="tidal data")
     )
     hotstart: Optional[SCHISMDataHotstart] = Field(
         None, description="hotstart data"
@@ -1294,6 +1293,7 @@ class SCHISMData(RompyBaseModel):
             if type(data) is DataBlob:
                 logger.info(f"Calling get on DataBlob for {datatype}")
                 output = data.get(destdir)
+
             else:
                 logger.info(f"Calling get on {type(data).__name__} for {datatype}")
                 output = data.get(destdir, grid, time)
